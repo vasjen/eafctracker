@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace eafctracker.Pages;
+namespace Eafctracker.Pages;
 
 public class PrivacyModel : PageModel
 {
