@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Eafctracker.Data;
+using Eafctracker.Services;
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,11 +19,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connection);
 });
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
+builder.Services.AddScoped<IProfitService, ProfitService>();
+builder.Services.AddScoped<IScraperService, ScraperService>();
+builder.Services.AddScoped<IHttpClientService, HttpClientService>();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddControllers();
 builder.Services.AddRazorPages();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -45,5 +48,6 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
-
+app.UseEndpoints(endp =>
+    endp.MapControllers());
 app.Run();
