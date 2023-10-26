@@ -6,10 +6,11 @@ namespace Eafctracker.Models
     {
         
         public int Id { get; init; }
-        public int FbId { get; init; }
-        public int FbDataId { get; init; }
+        public int FbId { get; set; }
+        public int FbDataId { get; set; }
         public string DisplayedName { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
+        public bool Tradable { get; set; } = false;
         public int PcId { get; set; }
         public Pc PcPrices { get; set; }
         public int PsId { get; set; }

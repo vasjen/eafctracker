@@ -1,4 +1,4 @@
-namespace Eafctracker.Services
+namespace Eafctracker.Services.Interfaces
 {
     public interface IHttpClientService
     {
