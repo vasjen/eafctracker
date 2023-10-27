@@ -6,9 +6,11 @@ using Eafctracker.Services.Interfaces;
 
 namespace Eafctracker.Services {
 
-    public  class InitialService (IScraperService scraperService) : IInitialService
+    public  class InitialService (IScraperService scraperService, IHttpClientService clientService) : IInitialService
     {
         private readonly IScraperService _scraperService = scraperService;
+        private readonly IHttpClientService _service = clientService;
+        
      
         private const string URL_PLAYER = "https://www.futbin.com/player/";
         private const string URL_PLAYERS = URL_PLAYER + "s";
@@ -23,14 +25,15 @@ namespace Eafctracker.Services {
             string version=string.Empty;
             string position=string.Empty;
             int counter=0;
-            int MaxPage=await GetMaxNumberPage("https://www.futbin.com/23/players?page=1&player_rating=82-99&ps_price=15000-15000000");
+            // int MaxPage=await GetMaxNumberPage("https://www.futbin.com/23/players?page=1&player_rating=82-99&ps_price=15000-15000000");
+            int MaxPage = 2;
             for (int pageNumber=1; pageNumber<=MaxPage; pageNumber++)
              {  
                 try 
                 {
                     var httpRequestMessage = new HttpRequestMessage(
                     HttpMethod.Get, $"https://www.futbin.com/23/players?page={pageNumber}&player_rating=82-99&ps_price=15000-15000000");
-                    var _client = _service.GetHttpClient();
+                    var _client = _service.GetClient();
                     
                     var httpResponseMessage = await _client.SendAsync(httpRequestMessage);
                     var response = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -87,7 +90,7 @@ namespace Eafctracker.Services {
             System.Console.WriteLine($"Total added a {counter} cards");
             Parallel.ForEach(cards, new ParallelOptions {MaxDegreeOfParallelism = 5}, async p=> { 
                 
-                    GetDataId(p);
+                    // GetDataId(p);
                     IsTradeble(p).Wait();
 
             });
@@ -100,30 +103,30 @@ namespace Eafctracker.Services {
             => await _scraperService.GetCard(FbId);
        
 
-        private async Task<int> GetMaxNumberPage(string Url)
-        {
-            var client = _service.GetHttpClient();
-            var result = await Scraping.GetPageAsStrings(client,Url);
-            string NumberString=string.Empty;
-            int MaxPage=0;
-            for (int i=result.Length-1;i>0;i--)
-            {
-                if (result[i].Contains("page-link \">"))
-                {
-                     NumberString = result[i];
-                     MaxPage=int.Parse(NumberString.Remove(NumberString.IndexOf("</a")).Substring(NumberString.IndexOf("\">")+2));
-                     break;
+        // private async Task<int> GetMaxNumberPage(string Url)
+        // {
+            // var client = _service.GetClient();
+            // var result = await Scraping.GetPageAsStrings(client,Url);
+            // string NumberString=string.Empty;
+            // int MaxPage=0;
+            // for (int i=result.Length-1;i>0;i--)
+            // {
+                // if (result[i].Contains("page-link \">"))
+                // {
+                     // NumberString = result[i];
+                     // MaxPage=int.Parse(NumberString.Remove(NumberString.IndexOf("</a")).Substring(NumberString.IndexOf("\">")+2));
+                     // break;
                     
-                }
-            }
-            System.Console.WriteLine("Max page is {0}", MaxPage);
-            return MaxPage;
-        }
+                // }
+            // }
+            // System.Console.WriteLine("Max page is {0}", MaxPage);
+            // return MaxPage;
+        // }
         private async  Task IsTradeble(Card card)
          {
           
             string Updated=string.Empty;
-            var _client = _service.GetHttpClient();
+            var _client = _service.GetClient();
 
             string requestUri = $"http://futbin.com/23/playerPrices?player={card.FbDataId}";
                

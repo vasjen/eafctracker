@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Eafctracker.Data;
 using Eafctracker.Services;
+using Eafctracker.Services.Interfaces;
 using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,8 @@ builder.Services.AddHttpClient("proxy",options =>
     string? apikey = builder.Configuration.GetValue<string>("Proxy:API");
     options.BaseAddress = new Uri($"https://proxy-seller.io/personal/api/v1/{apikey}/proxy/list/ipv4");
 });
-builder.Services.AddScoped<WebService>();
+builder.Services.AddScoped<IHttpClientService,HttpClientService>();
+builder.Services.AddScoped<IWebService,WebService>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();

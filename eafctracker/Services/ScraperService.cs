@@ -6,9 +6,9 @@ using Newtonsoft.Json;
 
 namespace Eafctracker.Services
 {
-    public class ScraperService : IScraperService
+    public class ScraperService(IHttpClientService httpClientService) : IScraperService
     {
-        
+        private readonly IHttpClientService _httpClientService = httpClientService;
         // private readonly IHttpClientService _httpClientService;
         private const string link = "player/";
         private const string latestPlayersLink = "https://www.futbin.com/latest";
@@ -60,7 +60,8 @@ namespace Eafctracker.Services
         
         private async Task<HtmlDocument?> GetHtmlDocument(string link)
         {   
-            var req = await _httpClientService.MakeRequestUsingRandomProxy(link);
+            var client = _httpClientService.GetClient();
+            var req = await client.GetAsync(link);
             if (req is null)
                 return null;
             
@@ -77,19 +78,20 @@ namespace Eafctracker.Services
 
         private async Task<string> GetPriceAsync(int FbDataId)
         {
-            var request = await _httpClientService.MakeRequestUsingRandomProxy($"24/playerPrices?player={FbDataId}");
+            var client = _httpClientService.GetClient();
+            var request = await client.GetAsync($"24/playerPrices?player={FbDataId}");
             return await request.Content.ReadAsStringAsync();
         
         }
         public async Task<IEnumerable<SalesHistory>?> GetSalesHistoryAsync (int fbDataId) {
             string URL="https://www.futbin.com/23/getPlayerSales?platform=ps&resourceId=";
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get,URL+fbDataId);
-            var _client = _service.GetHttpClient();
+            var _client = _httpClientService.GetClient();
             var httpResponseMessage = await _client.SendAsync(httpRequestMessage);
             var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
         
             try {
-                Histories = await JsonSerializer.DeserializeAsync<IEnumerable<SalesHistory>>(contentStream);
+                // Histories = await JsonSerializer<IEnumerable<SalesHistory>>(contentStream);
            
             }
             catch (JsonException ex)
@@ -102,8 +104,9 @@ namespace Eafctracker.Services
             return Histories;
            
         }
-        
-            
+
+        public IEnumerable<SalesHistory> Histories { get; set; }
+
 
         public string ParseFromDoc(HtmlDocument page,string xPath)
             =>  page.DocumentNode

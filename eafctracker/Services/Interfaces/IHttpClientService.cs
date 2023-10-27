@@ -2,5 +2,5 @@
 
 public interface IHttpClientService
 {
-    HttpClient GetClientAsync();
+    HttpClient GetClient();
 }

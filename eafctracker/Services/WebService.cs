@@ -37,6 +37,7 @@ public class WebService(IHttpClientFactory clientFactory) : IWebService
             {
                 Proxy = proxy
             };
+            
         }
     }
     

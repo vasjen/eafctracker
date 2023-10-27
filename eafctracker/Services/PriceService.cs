@@ -21,7 +21,7 @@ namespace Eafctracker.Services{
         {    
             int CurrentPrice=0;
             int NextPrice=0;
-            var _client = _service.GetHttpClient();
+            var _client = _service.GetClient();
 
             string requestUri = $"http://futbin.com/23/playerPrices?player={FBDataID}";
             Task.Delay(1000).Wait();  

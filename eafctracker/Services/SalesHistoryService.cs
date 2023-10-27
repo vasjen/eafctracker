@@ -9,10 +9,12 @@ namespace Eafctracker.Services {
 public class SalesHistoryService : ISalesHistoryService{
        
    public IEnumerable<SalesHistory>? Histories { get; set; }
-    `
-      
-        
 
+
+   public async Task<IEnumerable<SalesHistory>?> GetSalesHistoryAsync(int fbDataId)
+   {
+      throw new NotImplementedException();
+   }
 }
  
  
