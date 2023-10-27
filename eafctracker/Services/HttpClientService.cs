@@ -1,31 +1,19 @@
-using System.Net;
-using Eafctracker.Services.Interfaces;
+﻿using Eafctracker.Services.Interfaces;
 
-namespace Eafctracker.Services {
-    public class HttpClientService : IHttpClientService {
-         private Random rnd = new(); 
-         public IEnumerable<HttpClient> Clients {get; private set;}
-         public HttpClientService(ProxyHandler proxyHandler)
-         {  
-            var handlers = proxyHandler.GetProxyList();
-           
-            List<HttpClient> AllClients = new();
-            for (int i = 0 ; i < handlers.Count() ; i++) 
-            {
-                var client = new HttpClient(handlers.ElementAt(i));
-                client.DefaultRequestHeaders
-                .Add("User-Agent","User Agent	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)");
-                AllClients.Add(client);
-            }
-            this.Clients=AllClients;
-         }
-         public HttpClient GetHttpClient() =>
-             Clients.ElementAt(rnd.Next(Clients.Count()));
+namespace Eafctracker.Services;
 
-        public int HandlerCount()
-        {
-            return Clients.Count();
-        }
-    }
+public class HttpClientService(IWebService webService ) : IHttpClientService
+{
     
+    private readonly List<HttpClient> _httpClients = await webService.CreateHttpClients(webService.CreateHandlers(webService.GetProxyList()));
+    private int _currentIndex = 0;
+
+    public HttpClient GetClientAsync()
+    {
+        HttpClient client = _httpClients[_currentIndex];
+
+        _currentIndex = (_currentIndex + 1) % _httpClients.Count;
+
+        return client;
+    }
 }

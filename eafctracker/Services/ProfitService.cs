@@ -73,7 +73,7 @@ namespace Eafctracker.Services
                     
                     var history = await _history.GetSalesHistoryAsync(FBDataId);
 
-                    var lastTenSales = history?.Where(p=>p.status.Contains("closed"))
+                    var lastTenSales = history?.Where(p=>p.Status.Contains("closed"))
                              .Take(10);
                              
                     var avgPrice=(lastTenSales!.OrderByDescending(p=>p.Price).Select(p=>p.Price).Sum())/10;

@@ -6,12 +6,13 @@ using Eafctracker.Services.Interfaces;
 
 namespace Eafctracker.Services {
 
-    public  class InitialService : IInitialService {
-        
+    public  class InitialService (IScraperService scraperService) : IInitialService
+    {
+        private readonly IScraperService _scraperService = scraperService;
      
-        private readonly IHttpClientService _service;
-        public InitialService(IHttpClientService service) => _service=service;
-         
+        private const string URL_PLAYER = "https://www.futbin.com/player/";
+        private const string URL_PLAYERS = URL_PLAYER + "s";
+            // "https://www.futbin.com/23/players?page=1&player_rating=82-99&ps_price=15000-15000000"
         public  async Task<IEnumerable<Card>> GetCardsRangeAsync(){
             
 
@@ -71,7 +72,7 @@ namespace Eafctracker.Services {
                         if (result[i].Contains("<span class=\" font-weight-bold\">"))
                         {   counter++;
                             string priceS=result[i].Remove(result[i].IndexOf("<img")-1).Substring(result[i].IndexOf("\">")+2);
-                            cards.Add(new Card {FbId=int.Parse(stringId), Name= name, Revision= version,Raiting=int.Parse(raiting),Position=position});
+                            cards.Add(new Card {FbId=int.Parse(stringId), Name= name, Revision= version,Rating=int.Parse(raiting),Position=position});
                             System.Console.WriteLine($"[{counter}] Added {name} + {version}");
                         }
                         
@@ -94,74 +95,10 @@ namespace Eafctracker.Services {
         return cards;
         
         }
-        public async Task<Card> GetNewCardAsync(int FbId)
-        {
-            var client=_service.GetHttpClient();
-            string URL = $"https://www.futbin.com/23/player/{FbId}";
-            var page = await Scraping.GetPageAsStrings(client,URL);
-            Card card = new();
-            for (int i=0;i<page.Length;i++)
-            {
-                if (page[i].Contains("data-url"))
-                {
-                    var found=page[i];
-                    string dataUrl=found.Remove(found.LastIndexOf("\""));
-                    string Name= dataUrl.Substring(dataUrl.LastIndexOf("/")+1);
-                    card.Name=Name;
-                   
-                }
-                if (page[i].Contains("pcdisplay-rat"))
-                {
-                    var found=page[i];
-                    string pcdisplayRat=found.Remove(found.LastIndexOf("<"));
-                    string Raiting = pcdisplayRat.Substring(pcdisplayRat.LastIndexOf(">")+1);
-                    card.Raiting=int.Parse(Raiting);
-                    
-                }
-                if (page[i].Contains("pcdisplay-pos"))
-                {
-                    var found=page[i];
-                    string pcdisplayPos=found.Remove(found.LastIndexOf("<"));
-                    string Position = pcdisplayPos.Substring(pcdisplayPos.LastIndexOf(">")+1);
-                    card.Position=Position;
-                }
-                
-                if (page[i].Contains("download-prices-player-revision"))
-                {
-                    var found=page[i];
-                    string versionsOnPage=found.Remove(found.LastIndexOf("<"));
-                    string Version = versionsOnPage.Substring(versionsOnPage.LastIndexOf(">")+1);
-                    card.Revision=Version;
-                    card.FbId = FbId;
-                }
-            };
-             GetDataId(card);
-            IsTradeble(card).Wait();
-            
-            return card;
-        }
-        private void GetDataId(Card Card)
-        {
-            int counter=0;
-                var client = _service.GetHttpClient();
-                var result =  Scraping.GetPageAsStrings(client,$"http://www.futbin.com/23/player/{Card.FbId}");
-                    if (result!=null){
-                     for (int i=0; i<result.Result.Length;i++)
-                     {
-                        if (result.Result[i].Contains("data-player-resource")){
-                            string id = result.Result[i].Remove(result.Result[i].LastIndexOf('"')).Substring(result.Result[i].LastIndexOf("=\"")+2);
-                              Card.FbDataId=int.Parse(id);
-                              break;
-                        }
-                
-                     }
-                     }
-                     else {
-                        System.Console.WriteLine("Page is null for {0} - {1} : {2}",Card.Name, Card.Revision, Card.FbId);
-                        System.Console.WriteLine("Or FBDataId not found, rly? {0}",Card.FbDataId);
-                     }
-                     
-        }
+
+        public async Task<Card?> GetNewCardAsync(int FbId)
+            => await _scraperService.GetCard(FbId);
+       
 
         private async Task<int> GetMaxNumberPage(string Url)
         {
@@ -211,7 +148,6 @@ namespace Eafctracker.Services {
                     }
                     catch (Exception ex) { 
                         System.Console.WriteLine(ex.Message);
-                        System.Console.WriteLine(response.Content.ReadAsStringAsync());
                         
                         }
 

@@ -78,20 +78,20 @@ namespace Eafctracker.Services
             return int.Parse(FbId_string);
         }
 
-        public async Task<Card> GetNewCardAsync(int FbId)
+        public async Task<Card?> GetNewCardAsync(int FbId)
         {
             return  await _initial.GetNewCardAsync(FbId);
         }
 
-        public async Task<IEnumerable<Card>> GetNewCardsRange(IEnumerable<int> FbIds)
+        public async Task<IEnumerable<Card?>> GetNewCardsRange(IEnumerable<int> FbIds)
         {
-            List<Card> Cards = new();
-            Card card = new();
+            List<Card?> Cards = new();
+            Card? card = new();
             foreach (var Fbid in FbIds)
                 {
                     try {
                         card =await _initial.GetNewCardAsync(Fbid);
-                        if (card.Raiting>=82){
+                        if (card.Rating>=82){
                         Cards.Add(card);
                         }
                     }

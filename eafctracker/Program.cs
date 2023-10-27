@@ -23,7 +23,6 @@ builder.Services.AddHttpClient("proxy",options =>
     string? apikey = builder.Configuration.GetValue<string>("Proxy:API");
     options.BaseAddress = new Uri($"https://proxy-seller.io/personal/api/v1/{apikey}/proxy/list/ipv4");
 });
-builder.Services.AddScoped<IProxyService,ProxyService>();
 builder.Services.AddScoped<WebService>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)

@@ -1,10 +1,11 @@
 ﻿using System.Net;
 using Eafctracker.Models;
+using Eafctracker.Services.Interfaces;
 using Newtonsoft.Json;
 
 namespace Eafctracker.Services;
 
-public class WebService(IHttpClientFactory clientFactory)
+public class WebService(IHttpClientFactory clientFactory) : IWebService
 {
     private readonly HttpClient _client = clientFactory.CreateClient("proxy");
 
@@ -39,13 +40,15 @@ public class WebService(IHttpClientFactory clientFactory)
         }
     }
     
-    public async IAsyncEnumerable<HttpClient> CreateHttpClients(IAsyncEnumerable<HttpClientHandler> handlers)
+    public async Task<List<HttpClient>> CreateHttpClients(IAsyncEnumerable<HttpClientHandler> handlers)
     {
+        List<HttpClient> clients = new();
         await foreach (HttpClientHandler handler in handlers)
         {
-            yield return new HttpClient(handler: handler, disposeHandler: true);
+            clients.Add(new HttpClient(handler: handler, disposeHandler: true));
         }
-        
+
+        return clients;
     }
 
     public async IAsyncEnumerable<string> GetIpAddresses(IAsyncEnumerable<HttpClient> clients)

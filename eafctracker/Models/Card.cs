@@ -17,7 +17,7 @@ namespace Eafctracker.Models
         public Ps PsPrices {get;set;}
         public string Position { get; set; } = string.Empty;
         public string Revision { get; set; } = string.Empty;
-        public int Raiting { get; set; }
+        public int Rating { get; set; }
 
     }
 }
